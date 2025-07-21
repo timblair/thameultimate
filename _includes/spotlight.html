@@ -1,0 +1,23 @@
+<section id="{{ include.id }}" class="wrapper spotlight {{ include.style }}">
+  <div class="inner">
+    <span class="image">
+      {% if include.link %}<a href="{{ include.link }}">{% endif %}
+      <img src="{{ include.image }}" alt="{{ include.alt | default: '' }}" />
+      {% if include.link %}</a>{% endif %}
+    </span>
+    <div class="content">
+      <h2 class="major">{{ include.title }}</h2>
+      {{ include.content }}
+      {% if include.button_url and include.button_text %}
+        <a href="{{ include.button_url }}" class="special">{{ include.button_text }}</a>
+      {% endif %}
+    </div>
+  </div>
+  {% if include.features %}
+    <div class="inner feature-wrapper">
+      <section class="features">
+        {{ include.features }}
+      </section>
+    </div>
+  {% endif %}
+</section> 

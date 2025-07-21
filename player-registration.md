@@ -13,17 +13,18 @@ title: Thame the Disc: Player Registration
 
 <!-- Wrapper -->
 <section id="wrapper">
-  <!-- One -->
-  <section id="one" class="wrapper spotlight style1">
-    <div class="inner">
-      <span class="image"><img src="/images/pic01.jpg" alt="" /></span>
-      <div class="content">
-        <h2 class="major">Registering as a Player</h2>
-        <p>To play or train with Thame the Disc, you need to be at least 14 years old, and:</p>
-        <a href="https://www.ukultimate.com/membership" class="special">Be a member of the UK Ultimate Association</a>
-        <a href="https://bit.ly/tu-registration" class="special">Enter your details on the player registration form</a>
-        <a href="https://bit.ly/tu-consent" class="special">Complete and return a consent form, if you're under 18</a>
-      </div>
-    </div>
-  </section>
+  {% for section in site.data.player_registration_sections %}
+    {% include spotlight.html
+      id=section.id
+      style=section.style
+      image=section.image
+      link=section.link
+      alt=section.alt
+      title=section.title
+      content=section.content
+      button_url=section.button_url
+      button_text=section.button_text
+      features=section.features
+    %}
+  {% endfor %}
 </section> 

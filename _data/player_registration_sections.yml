@@ -1,0 +1,11 @@
+- id: one
+  style: style1
+  image: /images/pic01.jpg
+  title: Registering as a Player
+  content: |
+    <p>To play or train with Thame the Disc, you need to be at least 14 years old, and:</p>
+  button_url: https://www.ukultimate.com/membership
+  button_text: Be a member of the UK Ultimate Association
+  features: |
+    <a href="https://bit.ly/tu-registration" class="special">Enter your details on the player registration form</a>
+    <a href="https://bit.ly/tu-consent" class="special">Complete and return a consent form, if you're under 18</a> 

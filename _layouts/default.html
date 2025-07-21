@@ -1,0 +1,62 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <title>{{ page.title | default: site.title }}</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="/assets/css/main.css" />
+    <meta property="og:title" content="Thame the Disc: Ultimate Frisbee in Thame" />
+    <meta property="og:description" content="Ultimate on the Oxfordshire / Buckinghamshire border. Ultimate is a fast-moving team sport enjoyed by millions of players the world over. Beginners find the game easy to learn and fun to play, so come along and discover why many think this is the ultimate team sport." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://thameultimate.club/images/og.jpg" />
+    <meta property="og:url" content="https://thameultimate.club/" />
+    <meta name="twitter:card" content="summary_large_image" />
+  </head>
+  <body>
+    <div id="page-wrapper">
+      {{ content }}
+      <!-- Footer -->
+      <section id="footer">
+        <div class="inner">
+          <h2 class="major">Get in touch</h2>
+          <p>If you want to know more about Ultimate, or are interested in coming along to a training session, just drop us a message.</p>
+          <form method="post" action="https://formspree.io/contact@thameultimate.club">
+            <input type="hidden" name="_subject" value="Contact from thameultimate.club website" />
+            <div class="field">
+              <label for="name">Name</label>
+              <input type="text" name="name" id="name" />
+            </div>
+            <div class="field">
+              <label for="email">Email</label>
+              <input type="email" name="email" id="email" />
+            </div>
+            <div class="field">
+              <label for="message">Message</label>
+              <textarea name="message" id="message" rows="4"></textarea>
+            </div>
+            <ul class="actions">
+              <li><input type="submit" value="Send Message" /></li>
+            </ul>
+          </form>
+          <ul class="contact">
+            <li class="fa-envelope"><a href="mailto:contact@thameultimate.club">contact@thameultimate.club</a></li>
+            <li class="fa-envelope"><a href="https://groups.google.com/g/thame-the-disc">groups.google.com/g/thame-the-disc</a></li>
+            <li class="fa-facebook"><a href="https://www.facebook.com/thamethedisc">facebook.com/thamethedisc</a></li>
+            <li class="fa-instagram"><a href="https://www.instagram.com/thamethedisc">instagram.com/thamethedisc</a></li>
+          </ul>
+          <ul class="copyright">
+            <li><a href="/">Home</a></li>
+            <li><a href="/player-registration">Player Registration</a></li>
+            <li><a href="/juniors">Juniors</a></li>
+            <li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
+          </ul>
+        </div>
+      </section>
+    </div>
+    <script src="/assets/js/skel.min.js"></script>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/jquery.scrollex.min.js"></script>
+    <script src="/assets/js/util.js"></script>
+    <script src="/assets/js/main.js"></script>
+  </body>
+</html> 

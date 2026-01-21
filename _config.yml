@@ -4,4 +4,15 @@ theme: null
 plugins:
   - jekyll-feed
   - jekyll-seo-tag
-  - jekyll-redirect-from 
+  - jekyll-redirect-from
+
+collections:
+  redirects:
+    output: true
+
+defaults:
+  - scope:
+      type: redirects
+    values:
+      layout: null
+      sitemap: false 

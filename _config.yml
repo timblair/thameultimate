@@ -3,4 +3,5 @@ url: "https://thameultimate.club"
 theme: null
 plugins:
   - jekyll-feed
-  - jekyll-seo-tag 
+  - jekyll-seo-tag
+  - jekyll-redirect-from 

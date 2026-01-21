@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Thame the Disc: Player Registration
+title: Thame the Disc - Player Registration
 ---
 
 <!-- Banner -->

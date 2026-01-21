@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Thame the Disc: Ultimate Frisbee in Thame
+title: Thame the Discs - Ultimate Frisbee in Thame
 ---
 
 <!-- Banner -->

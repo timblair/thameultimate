@@ -1,6 +1,6 @@
 ---
 layout: default
-title: Thame the Disc: Ultimate Frisbee in Thame — Juniors
+title: Thame the Disc - Ultimate Frisbee in Thame — Juniors
 ---
 
 <!-- Banner -->

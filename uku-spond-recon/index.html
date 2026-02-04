@@ -743,24 +743,24 @@
                     <div class="stat-label">Spond Members</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-value">${ukuMembers.size}</div>
-                    <div class="stat-label">Active in UKU Export</div>
+                    <div class="stat-value">${ukuData.length}</div>
+                    <div class="stat-label">UKU Rostered Members</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value success">${allGood.length}</div>
-                    <div class="stat-label">Matched ✓</div>
+                    <div class="stat-label">On Spond with Active UKU Membership ✓</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value ${needsChasing.length > 0 ? 'warning' : 'success'}">${needsChasing.length}</div>
-                    <div class="stat-label">No Active UKU</div>
+                    <div class="stat-label">On Spond but no UKU Membership</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value ${noUkuId.length > 0 ? 'warning' : ''}">${noUkuId.length}</div>
-                    <div class="stat-label">No UKU ID in Spond</div>
+                    <div class="stat-label">On Spond with no UKU ID</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value ${ukuNotInSpond.length > 0 ? 'warning' : ''}">${ukuNotInSpond.length}</div>
-                    <div class="stat-label">UKU Not in Spond</div>
+                    <div class="stat-label">On UKU Roster but not in Spond</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value ${dataMismatches.length > 0 ? 'warning' : ''}">${dataMismatches.length}</div>

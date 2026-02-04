@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UKU Membership Reconciliation Tool</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        
+        h1 {
+            color: #2c5282;
+            margin-bottom: 0.5rem;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 2rem;
+        }
+        
+        .step {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .step h2 {
+            margin-top: 0;
+            color: #2c5282;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .step-number {
+            background: #2c5282;
+            color: white;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+        }
+        
+        .instructions {
+            background: #f0f4f8;
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        
+        .instructions code {
+            background: #e2e8f0;
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.85rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        select, input[type="file"] {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        input[type="file"] {
+            padding: 0.75rem;
+            background: #fafafa;
+            cursor: pointer;
+        }
+        
+        .file-status {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        .file-status.loaded {
+            color: #276749;
+        }
+        
+        .file-status.error {
+            color: #c53030;
+        }
+        
+        button {
+            background: #2c5282;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #1a365d;
+        }
+        
+        button:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+        
+        .results {
+            display: none;
+        }
+        
+        .results.visible {
+            display: block;
+        }
+        
+        .summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat {
+            background: #f0f4f8;
+            padding: 1rem;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c5282;
+        }
+        
+        .stat-value.warning {
+            color: #c53030;
+        }
+        
+        .stat-value.success {
+            color: #276749;
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.25rem;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        th {
+            background: #f0f4f8;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background: #f7fafc;
+        }
+        
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+        }
+        
+        .table-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin: 0.25rem 0 0.75rem 0;
+        }
+        
+        .export-buttons {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .export-buttons button {
+            background: #48bb78;
+        }
+        
+        .export-buttons button:hover {
+            background: #38a169;
+        }
+        
+        .no-issues {
+            text-align: center;
+            padding: 2rem;
+            color: #276749;
+        }
+        
+        .no-issues svg {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 1rem;
+        }
+        
+        .warning-note {
+            background: #fffaf0;
+            border-left: 4px solid #ed8936;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .column-preview {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 0.5rem;
+            max-height: 60px;
+            overflow-y: auto;
+        }
+        
+        .email-columns-container {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .email-columns-container select {
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        .field-hint {
+            font-size: 0.8rem;
+            color: #666;
+            margin: 0.25rem 0 0 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>UKU Membership Reconciliation</h1>
+    <p class="subtitle">Check which club members need to renew their UK Ultimate membership</p>
+    
+    <div class="step">
+        <h2><span class="step-number">1</span> Upload Spond Export</h2>
+        <div class="instructions">
+            In Spond Club: Go to <code>Members</code> → <code>Active Members</code> → select all → click <code>Export</code> to download the XLSX file containing your club members and their UKU numbers.
+        </div>
+        <input type="file" id="spondFile" accept=".xlsx,.xls,.csv">
+        <div id="spondStatus" class="file-status"></div>
+        
+        <div id="spondColumnSelect" style="display:none; margin-top: 1rem;">
+            <label for="spondUkuColumn">Which column contains the UKU ID?</label>
+            <select id="spondUkuColumn"></select>
+            <div id="spondColumnPreview" class="column-preview"></div>
+            
+            <label for="spondFirstNameColumn" style="margin-top: 0.75rem;">Which column contains the first name?</label>
+            <select id="spondFirstNameColumn"></select>
+            
+            <label for="spondLastNameColumn" style="margin-top: 0.75rem;">Which column contains the surname?</label>
+            <select id="spondLastNameColumn"></select>
+            
+            <label for="spondEmailColumn" style="margin-top: 0.75rem;">Which column(s) contain email? (select primary first, then fallback)</label>
+            <div class="email-columns-container">
+                <select id="spondEmailColumn1"></select>
+                <select id="spondEmailColumn2"></select>
+                <select id="spondEmailColumn3"></select>
+            </div>
+            <p class="field-hint">Select the member's email first, then guardian email(s) as fallback. The tool will use the first non-empty email it finds.</p>
+        </div>
+    </div>
+    
+    <div class="step">
+        <h2><span class="step-number">2</span> Upload JustGo/UKU Export</h2>
+        <div class="instructions">
+            In JustGo: Go to <code>Club Reports</code> from the main menu → <code>Members</code> category → <code>Club Members</code> report → <code>Export CSV</code> to download the file of UKU members.
+        </div>
+        <input type="file" id="ukuFile" accept=".xlsx,.xls,.csv">
+        <div id="ukuStatus" class="file-status"></div>
+        
+        <div id="ukuColumnSelect" style="display:none; margin-top: 1rem;">
+            <label for="ukuIdColumn">Which column contains the UKU ID/Member Number?</label>
+            <select id="ukuIdColumn"></select>
+            <div id="ukuColumnPreview" class="column-preview"></div>
+            
+            <label for="ukuFirstNameColumn" style="margin-top: 0.75rem;">Which column contains the first name?</label>
+            <select id="ukuFirstNameColumn"></select>
+            
+            <label for="ukuLastNameColumn" style="margin-top: 0.75rem;">Which column contains the surname?</label>
+            <select id="ukuLastNameColumn"></select>
+            
+            <label for="ukuEmailColumn" style="margin-top: 0.75rem;">Which column contains email?</label>
+            <select id="ukuEmailColumn"></select>
+            
+            <label for="ukuExpiryColumn" style="margin-top: 0.75rem;">Which column contains the membership expiry date?</label>
+            <select id="ukuExpiryColumn"></select>
+            <div id="ukuExpiryPreview" class="column-preview"></div>
+        </div>
+    </div>
+    
+    <div class="step">
+        <h2><span class="step-number">3</span> Run Reconciliation</h2>
+        <button id="reconcileBtn" disabled>Compare Memberships</button>
+    </div>
+    
+    <div id="results" class="step results">
+        <h2>Results</h2>
+        <div id="summary" class="summary"></div>
+        <div id="resultsContent"></div>
+        <div id="exportSection" class="export-buttons"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        let spondData = null;
+        let ukuData = null;
+        let spondColumns = [];
+        let ukuColumns = [];
+        let reconciliationResults = null;
+
+        // File upload handlers
+        document.getElementById('spondFile').addEventListener('change', (e) => {
+            handleFileUpload(e.target.files[0], 'spond');
+        });
+
+        document.getElementById('ukuFile').addEventListener('change', (e) => {
+            handleFileUpload(e.target.files[0], 'uku');
+        });
+
+        async function handleFileUpload(file, type) {
+            const statusEl = document.getElementById(`${type}Status`);
+            const columnSelectEl = document.getElementById(`${type}ColumnSelect`);
+            
+            if (!file) return;
+            
+            statusEl.textContent = 'Reading file...';
+            statusEl.className = 'file-status';
+            
+            try {
+                const data = await readExcelFile(file);
+                
+                if (data.length === 0) {
+                    throw new Error('File appears to be empty');
+                }
+                
+                const columns = Object.keys(data[0]);
+                
+                if (type === 'spond') {
+                    spondData = data;
+                    spondColumns = columns;
+                    populateColumnDropdowns('spond', columns);
+                } else {
+                    ukuData = data;
+                    ukuColumns = columns;
+                    populateColumnDropdowns('uku', columns);
+                }
+                
+                statusEl.textContent = `✓ Loaded ${data.length} rows`;
+                statusEl.className = 'file-status loaded';
+                columnSelectEl.style.display = 'block';
+                
+                checkReadyToReconcile();
+            } catch (err) {
+                statusEl.textContent = `Error: ${err.message}`;
+                statusEl.className = 'file-status error';
+                columnSelectEl.style.display = 'none';
+            }
+        }
+
+        function readExcelFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const workbook = XLSX.read(e.target.result, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const data = XLSX.utils.sheet_to_json(firstSheet, { defval: '' });
+                        resolve(data);
+                    } catch (err) {
+                        reject(new Error('Could not parse file. Is it a valid Excel/CSV file?'));
+                    }
+                };
+                reader.onerror = () => reject(new Error('Could not read file'));
+                reader.readAsArrayBuffer(file);
+            });
+        }
+
+        function populateColumnDropdowns(type, columns) {
+            if (type === 'spond') {
+                const ukuSelect = document.getElementById('spondUkuColumn');
+                const firstNameSelect = document.getElementById('spondFirstNameColumn');
+                const lastNameSelect = document.getElementById('spondLastNameColumn');
+                const emailSelect1 = document.getElementById('spondEmailColumn1');
+                const emailSelect2 = document.getElementById('spondEmailColumn2');
+                const emailSelect3 = document.getElementById('spondEmailColumn3');
+                
+                populateSelect(ukuSelect, columns, guessColumn(columns, ['uku', 'member id', 'member number', 'membership', 'id number']));
+                populateSelect(firstNameSelect, columns, guessColumn(columns, ['first name', 'firstname', 'first', 'forename', 'given name']));
+                populateSelect(lastNameSelect, columns, guessColumn(columns, ['last name', 'lastname', 'last', 'surname', 'family name']));
+                
+                // For email columns, use specific defaults
+                const emailGuess1 = guessColumn(columns, ['member email']);
+                const emailGuess2 = guessColumn(columns, ['guardian 1 email']);
+                const emailGuess3 = guessColumn(columns, ['payment contact email']);
+                
+                populateSelect(emailSelect1, columns, emailGuess1, true);
+                populateSelect(emailSelect2, columns, emailGuess2, true);
+                populateSelect(emailSelect3, columns, emailGuess3, true);
+                
+                ukuSelect.addEventListener('change', () => updateColumnPreview('spond'));
+                updateColumnPreview('spond');
+            } else {
+                const idSelect = document.getElementById('ukuIdColumn');
+                const firstNameSelect = document.getElementById('ukuFirstNameColumn');
+                const lastNameSelect = document.getElementById('ukuLastNameColumn');
+                const emailSelect = document.getElementById('ukuEmailColumn');
+                const expirySelect = document.getElementById('ukuExpiryColumn');
+                
+                populateSelect(idSelect, columns, guessColumn(columns, ['member id', 'member number', 'uku id', 'id', 'membership number', 'number']));
+                populateSelect(firstNameSelect, columns, guessColumn(columns, ['first name', 'firstname', 'first', 'forename', 'given name']));
+                populateSelect(lastNameSelect, columns, guessColumn(columns, ['last name', 'lastname', 'last', 'surname', 'family name']));
+                populateSelect(emailSelect, columns, guessColumn(columns, ['email address']), true);
+                populateSelect(expirySelect, columns, guessColumn(columns, ['expiry', 'expiry date', 'expires', 'membership expiry', 'end date', 'valid until']));
+                
+                idSelect.addEventListener('change', () => updateColumnPreview('uku'));
+                expirySelect.addEventListener('change', () => updateExpiryPreview());
+                updateColumnPreview('uku');
+                updateExpiryPreview();
+            }
+        }
+
+        function populateSelect(select, columns, defaultValue, includeNone = false) {
+            select.innerHTML = '';
+            
+            if (includeNone) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = '-- None --';
+                select.appendChild(opt);
+            }
+            
+            columns.forEach(col => {
+                const opt = document.createElement('option');
+                opt.value = col;
+                opt.textContent = col;
+                if (col === defaultValue) opt.selected = true;
+                select.appendChild(opt);
+            });
+        }
+
+        function guessColumn(columns, keywords) {
+            const lower = columns.map(c => c.toLowerCase());
+            for (const keyword of keywords) {
+                const idx = lower.findIndex(c => c.includes(keyword));
+                if (idx !== -1) return columns[idx];
+            }
+            return columns[0];
+        }
+
+        function updateColumnPreview(type) {
+            const data = type === 'spond' ? spondData : ukuData;
+            const selectId = type === 'spond' ? 'spondUkuColumn' : 'ukuIdColumn';
+            const previewId = type === 'spond' ? 'spondColumnPreview' : 'ukuColumnPreview';
+            
+            const column = document.getElementById(selectId).value;
+            const preview = document.getElementById(previewId);
+            
+            const samples = data.slice(0, 5).map(row => row[column]).filter(v => v !== '');
+            preview.textContent = samples.length > 0 
+                ? `Sample values: ${samples.join(', ')}`
+                : 'No values found in this column';
+        }
+        
+        function updateExpiryPreview() {
+            if (!ukuData) return;
+            const column = document.getElementById('ukuExpiryColumn').value;
+            const preview = document.getElementById('ukuExpiryPreview');
+            
+            const samples = ukuData.slice(0, 3).map(row => {
+                const raw = row[column];
+                const parsed = parseDate(raw);
+                if (parsed) {
+                    const formatted = parsed.toLocaleDateString('en-GB');
+                    return `"${raw}" → ${formatted}`;
+                } else {
+                    return `"${raw}" → (not recognised)`;
+                }
+            });
+            preview.textContent = samples.length > 0 
+                ? `Parsing check: ${samples.join(', ')}`
+                : 'No values found in this column';
+        }
+        
+        // Parse various date formats that might come from Excel
+        function parseDate(value) {
+            if (!value) return null;
+            
+            // If it's already a Date object
+            if (value instanceof Date) return value;
+            
+            // If it's an Excel serial date number
+            if (typeof value === 'number') {
+                // Excel dates are days since 1900-01-01 (with a leap year bug)
+                const excelEpoch = new Date(1899, 11, 30);
+                const date = new Date(excelEpoch.getTime() + value * 86400000);
+                if (!isNaN(date.getTime())) return date;
+            }
+            
+            const str = String(value).trim();
+            if (!str) return null;
+            
+            // Try standard Date parsing first
+            let date = new Date(str);
+            if (!isNaN(date.getTime())) return date;
+            
+            // Try DD/MM/YYYY format (common in UK)
+            const ddmmyyyy = str.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+            if (ddmmyyyy) {
+                date = new Date(ddmmyyyy[3], ddmmyyyy[2] - 1, ddmmyyyy[1]);
+                if (!isNaN(date.getTime())) return date;
+            }
+            
+            // Try YYYY-MM-DD format
+            const yyyymmdd = str.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+            if (yyyymmdd) {
+                date = new Date(yyyymmdd[1], yyyymmdd[2] - 1, yyyymmdd[3]);
+                if (!isNaN(date.getTime())) return date;
+            }
+            
+            return null;
+        }
+
+        function checkReadyToReconcile() {
+            const ready = spondData && ukuData;
+            document.getElementById('reconcileBtn').disabled = !ready;
+        }
+
+        document.getElementById('reconcileBtn').addEventListener('click', runReconciliation);
+
+        function normalizeId(id) {
+            if (id === null || id === undefined || id === '') return '';
+            // Convert to string and trim whitespace
+            let str = String(id).trim();
+            if (str === '') return '';
+            // Lowercase, remove non-alphanumeric, then strip leading zeroes
+            let normalized = str.toLowerCase().replace(/[^a-z0-9]/g, '');
+            if (normalized === '') return ''; // Was only special characters
+            // Strip leading zeroes but keep at least one character if it's all zeroes
+            normalized = normalized.replace(/^0+/, '') || '0';
+            return normalized;
+        }
+
+        function runReconciliation() {
+            const spondUkuCol = document.getElementById('spondUkuColumn').value;
+            const spondFirstNameCol = document.getElementById('spondFirstNameColumn').value;
+            const spondLastNameCol = document.getElementById('spondLastNameColumn').value;
+            const spondEmailCols = [
+                document.getElementById('spondEmailColumn1').value,
+                document.getElementById('spondEmailColumn2').value,
+                document.getElementById('spondEmailColumn3').value
+            ].filter(col => col); // Remove empty selections
+            
+            const ukuIdCol = document.getElementById('ukuIdColumn').value;
+            const ukuFirstNameCol = document.getElementById('ukuFirstNameColumn').value;
+            const ukuLastNameCol = document.getElementById('ukuLastNameColumn').value;
+            const ukuEmailCol = document.getElementById('ukuEmailColumn').value;
+            const ukuExpiryCol = document.getElementById('ukuExpiryColumn').value;
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Start of today
+            
+            // Build map of active UKU members (ID -> member details)
+            // Only include members whose membership hasn't expired
+            const ukuMembers = new Map();
+            
+            // Also build a map of ALL UKU members (including expired) for the "not in Spond" check
+            const allUkuMembers = new Map();
+            
+            ukuData.forEach(row => {
+                const rawId = row[ukuIdCol];
+                const id = normalizeId(rawId);
+                if (!id) return;
+                
+                // Check expiry date
+                const expiryDate = parseDate(row[ukuExpiryCol]);
+                const isExpired = expiryDate && expiryDate < today;
+                
+                const firstName = (row[ukuFirstNameCol] || '').trim();
+                const lastName = (row[ukuLastNameCol] || '').trim();
+                const email = ukuEmailCol ? (row[ukuEmailCol] || '').trim() : '';
+                
+                const memberData = {
+                    name: `${firstName} ${lastName}`.trim() || 'Unknown',
+                    firstName,
+                    lastName,
+                    email,
+                    ukuId: rawId || '',
+                    expiryDate,
+                    status: isExpired ? 'Expired' : 'Active',
+                    raw: row
+                };
+                
+                // Add to all members map (for not-in-Spond check)
+                allUkuMembers.set(id, memberData);
+                
+                // Only add to active members map if not expired
+                if (!isExpired) {
+                    ukuMembers.set(id, memberData);
+                }
+            });
+            
+            // Track which UKU IDs we've seen in Spond
+            const seenUkuIds = new Set();
+            
+            // Helper to get first non-empty email from the configured columns
+            function getEmail(row) {
+                for (const col of spondEmailCols) {
+                    const val = row[col];
+                    if (val && String(val).trim() && String(val).includes('@')) {
+                        return String(val).trim();
+                    }
+                }
+                return '';
+            }
+            
+            // Helper to normalize strings for comparison
+            function normalizeForComparison(str) {
+                return (str || '').trim().toLowerCase();
+            }
+            
+            // Check each Spond member
+            const needsChasing = [];
+            const allGood = [];
+            const noUkuId = [];
+            const dataMismatches = [];
+            
+            spondData.forEach(row => {
+                const rawUkuId = row[spondUkuCol];
+                const normalizedId = normalizeId(rawUkuId);
+                const firstName = (row[spondFirstNameCol] || '').trim();
+                const lastName = (row[spondLastNameCol] || '').trim();
+                const name = `${firstName} ${lastName}`.trim() || 'Unknown';
+                const email = getEmail(row);
+                
+                const member = {
+                    name,
+                    firstName,
+                    lastName,
+                    email,
+                    ukuId: rawUkuId || '',
+                    raw: row
+                };
+                
+                if (!normalizedId) {
+                    noUkuId.push(member);
+                } else if (ukuMembers.has(normalizedId)) {
+                    const ukuMember = ukuMembers.get(normalizedId);
+                    
+                    // Check for data mismatches
+                    const mismatches = [];
+                    if (normalizeForComparison(firstName) !== normalizeForComparison(ukuMember.firstName)) {
+                        mismatches.push({ field: 'First name', spond: firstName, uku: ukuMember.firstName });
+                    }
+                    if (normalizeForComparison(lastName) !== normalizeForComparison(ukuMember.lastName)) {
+                        mismatches.push({ field: 'Surname', spond: lastName, uku: ukuMember.lastName });
+                    }
+                    if (ukuMember.email && email && normalizeForComparison(email) !== normalizeForComparison(ukuMember.email)) {
+                        mismatches.push({ field: 'Email', spond: email, uku: ukuMember.email });
+                    }
+                    
+                    if (mismatches.length > 0) {
+                        dataMismatches.push({
+                            ukuId: rawUkuId,
+                            spondName: name,
+                            ukuName: ukuMember.name,
+                            mismatches
+                        });
+                    }
+                    
+                    allGood.push(member);
+                    seenUkuIds.add(normalizedId);
+                } else {
+                    needsChasing.push(member);
+                    seenUkuIds.add(normalizedId); // Still mark as seen even if not active
+                }
+            });
+            
+            // Find UKU members not in Spond (check ALL UKU members, not just active)
+            const ukuNotInSpond = [];
+            allUkuMembers.forEach((member, id) => {
+                if (!seenUkuIds.has(id)) {
+                    ukuNotInSpond.push(member);
+                }
+            });
+            
+            reconciliationResults = { needsChasing, allGood, noUkuId, ukuNotInSpond, dataMismatches, ukuMembers };
+            displayResults();
+        }
+
+        function displayResults() {
+            const { needsChasing, allGood, noUkuId, ukuNotInSpond, dataMismatches, ukuMembers } = reconciliationResults;
+            const resultsDiv = document.getElementById('results');
+            const summaryDiv = document.getElementById('summary');
+            const contentDiv = document.getElementById('resultsContent');
+            const exportDiv = document.getElementById('exportSection');
+            
+            resultsDiv.classList.add('visible');
+            
+            // Summary stats
+            summaryDiv.innerHTML = `
+                <div class="stat">
+                    <div class="stat-value">${spondData.length}</div>
+                    <div class="stat-label">Spond Members</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">${ukuMembers.size}</div>
+                    <div class="stat-label">Active in UKU Export</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value success">${allGood.length}</div>
+                    <div class="stat-label">Matched ✓</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value ${needsChasing.length > 0 ? 'warning' : 'success'}">${needsChasing.length}</div>
+                    <div class="stat-label">No Active UKU</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value ${noUkuId.length > 0 ? 'warning' : ''}">${noUkuId.length}</div>
+                    <div class="stat-label">No UKU ID in Spond</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value ${ukuNotInSpond.length > 0 ? 'warning' : ''}">${ukuNotInSpond.length}</div>
+                    <div class="stat-label">UKU Not in Spond</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value ${dataMismatches.length > 0 ? 'warning' : ''}">${dataMismatches.length}</div>
+                    <div class="stat-label">Data Mismatches</div>
+                </div>
+            `;
+            
+            // Results tables
+            const totalIssues = needsChasing.length + noUkuId.length + ukuNotInSpond.length + dataMismatches.length;
+            
+            if (totalIssues === 0) {
+                contentDiv.innerHTML = `
+                    <div class="no-issues">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3>All members are fully reconciled!</h3>
+                        <p>Nothing to chase this time.</p>
+                    </div>
+                `;
+                exportDiv.innerHTML = '';
+            } else {
+                let html = '';
+                
+                if (needsChasing.length > 0) {
+                    html += `
+                        <h3>Spond Members Without Active UKU Membership</h3>
+                        <p class="table-description">These members are in Spond with a UKU ID, but that ID doesn't appear in the active UKU members list.</p>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>UKU ID (from Spond)</th>
+                                        <th>Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${needsChasing.map(m => `
+                                        <tr>
+                                            <td>${escapeHtml(m.name)}</td>
+                                            <td>${escapeHtml(m.ukuId)}</td>
+                                            <td>${escapeHtml(m.email)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+                
+                if (noUkuId.length > 0) {
+                    html += `
+                        <h3 style="margin-top: 1.5rem;">Spond Members With No UKU ID Recorded</h3>
+                        <p class="table-description">These members haven't entered a UKU ID in Spond. They may not have registered with UKU at all.</p>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${noUkuId.map(m => `
+                                        <tr>
+                                            <td>${escapeHtml(m.name)}</td>
+                                            <td>${escapeHtml(m.email)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+                
+                if (ukuNotInSpond.length > 0) {
+                    html += `
+                        <h3 style="margin-top: 1.5rem;">UKU Members Not Found in Spond</h3>
+                        <p class="table-description">These people are in your club's UKU records but don't appear in your Spond member list.</p>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>UKU ID</th>
+                                        <th>Email</th>
+                                        <th>UKU Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${ukuNotInSpond.map(m => `
+                                        <tr>
+                                            <td>${escapeHtml(m.name)}</td>
+                                            <td>${escapeHtml(m.ukuId)}</td>
+                                            <td>${escapeHtml(m.email)}</td>
+                                            <td>${escapeHtml(m.status)}</td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+                
+                if (dataMismatches.length > 0) {
+                    html += `
+                        <h3 style="margin-top: 1.5rem;">Data Mismatches Between Spond and UKU</h3>
+                        <p class="table-description">These members matched on UKU ID, but have different data in each system.</p>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>UKU ID</th>
+                                        <th>Field</th>
+                                        <th>Spond Value</th>
+                                        <th>UKU Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${dataMismatches.flatMap(m => 
+                                        m.mismatches.map((mm, idx) => `
+                                            <tr>
+                                                <td>${idx === 0 ? escapeHtml(m.ukuId) : ''}</td>
+                                                <td>${escapeHtml(mm.field)}</td>
+                                                <td>${escapeHtml(mm.spond)}</td>
+                                                <td>${escapeHtml(mm.uku)}</td>
+                                            </tr>
+                                        `)
+                                    ).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    `;
+                }
+                
+                contentDiv.innerHTML = html;
+                
+                // Export buttons
+                exportDiv.innerHTML = `
+                    <button onclick="exportToCSV()">Export All Results to CSV</button>
+                `;
+            }
+            
+            // Scroll to results
+            resultsDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function exportToCSV() {
+            const { needsChasing, noUkuId, ukuNotInSpond, dataMismatches } = reconciliationResults;
+            
+            let csv = 'Category,Name,UKU ID,Email,Status,Details\n';
+            
+            needsChasing.forEach(m => {
+                csv += `"No active UKU membership","${escapeCsvField(m.name)}","${escapeCsvField(m.ukuId)}","${escapeCsvField(m.email)}","",""\n`;
+            });
+            
+            noUkuId.forEach(m => {
+                csv += `"No UKU ID in Spond","${escapeCsvField(m.name)}","","${escapeCsvField(m.email)}","",""\n`;
+            });
+            
+            ukuNotInSpond.forEach(m => {
+                csv += `"UKU member not in Spond","${escapeCsvField(m.name)}","${escapeCsvField(m.ukuId)}","${escapeCsvField(m.email)}","${escapeCsvField(m.status)}",""\n`;
+            });
+            
+            dataMismatches.forEach(m => {
+                const details = m.mismatches.map(mm => `${mm.field}: Spond="${mm.spond}" UKU="${mm.uku}"`).join('; ');
+                csv += `"Data mismatch","${escapeCsvField(m.spondName)}","${escapeCsvField(m.ukuId)}","","","${escapeCsvField(details)}"\n`;
+            });
+            
+            downloadFile(csv, 'uku-reconciliation-results.csv', 'text/csv');
+        }
+        
+        function escapeCsvField(str) {
+            if (!str) return '';
+            // Escape double quotes by doubling them, and wrap in quotes if contains comma/quote/newline
+            const escaped = String(str).replace(/"/g, '""');
+            return escaped;
+        }
+
+        function downloadFile(content, filename, mimeType) {
+            // Create a temporary textarea to hold the content, then trigger download
+            const a = document.createElement('a');
+            const blob = new Blob([content], { type: mimeType + ';charset=utf-8' });
+            const url = window.URL.createObjectURL(blob);
+            a.href = url;
+            a.download = filename;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 100);
+        }
+    </script>
+</body>
+</html>

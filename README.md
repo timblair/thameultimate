@@ -23,6 +23,7 @@ Website for Thame the Disc, an Ultimate Frisbee club based in Thame, Oxfordshire
 ├── _layouts/            # Page templates
 │   └── default.html
 ├── _redirects/          # URL redirects (Jekyll collection)
+├── uku-spond-recon/     # UKU membership reconciliation tool
 ├── assets/
 │   ├── css/
 │   ├── docs/            # PDFs (safeguarding policies etc.)
@@ -74,6 +75,14 @@ redirect_to: https://example.com/destination
 ```
 
 The redirect uses a client-side meta refresh tag (HTTP redirects are not supported on GitHub Pages).
+
+## UKU Membership Reconciliation Tool
+
+The `uku-spond-recon/` directory contains a standalone browser-based tool for reconciling membership data between Spond Club and the UK Ultimate (UKU) membership system. It helps identify club members who need to renew or obtain their UKU membership.
+
+The tool runs entirely client-side — upload a Spond member export (XLSX) and a UKU/JustGo member export (CSV), and it compares the two to flag mismatches, missing memberships, and expired registrations.
+
+Available at https://thameultimate.club/uku-spond-recon/. See [`uku-spond-recon/README.md`](uku-spond-recon/README.md) for full details.
 
 ## Deployment
 

@@ -30,11 +30,11 @@
 - id: three
   style: style3
   image: /images/training-map-manor-farm.png
-  link: http://bit.ly/ttd-manor-farm
+  link: /manor-farm-directions
   alt: Map of Kingsey showing the location of Manor Farm
   title: Join In
   content: |
     <p>Anyone can play Ultimate, and don't worry about not knowing how to throw or play: we'll teach you everything you need to know. We play twice a week at Manor Farm in Kingsey: on Mondays from 7:30–9pm, and Thursdays from 7:15–8:45pm.</p>
     <p>Those under 14 years old (school years 5 to 8) can join our <a href="/juniors">junior sessions</a> on Thursdays from 6–7:15pm.</p>
-    <a href="http://bit.ly/ttd-manor-farm" class="special">Find where Manor Farm training is</a>
+    <a href="/manor-farm-directions" class="special">Find where Manor Farm training is</a>
     <p>If you're new to Ultimate or the club, you're welcome to try things out for a couple of sessions. After that you'll need to complete our <a href="/player-registration">player registration</a>.</p> 

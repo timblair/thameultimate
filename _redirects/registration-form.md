@@ -1,4 +1,4 @@
 ---
 permalink: /registration-form
-redirect_to: https://docs.google.com/forms/d/e/1FAIpQLSfcUU0fmChcy3nErs5Q7Cb3dctvntJ-U7gdarGwlFMX_3r0Qw/viewform
+redirect_to: https://club.spond.com/landing/signup/thamethedisc/form/92F89E422AC6483F90C4A3951AC140DC
 ---

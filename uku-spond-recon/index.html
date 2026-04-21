@@ -937,7 +937,11 @@
                 
                 // Export buttons
                 exportDiv.innerHTML = `
-                    <button onclick="exportToCSV()">Export All Results to CSV</button>
+                    <button onclick="exportToCSV()">Export Results to CSV</button>
+                    <label style="display: inline-flex; align-items: center; gap: 0.4rem; font-weight: normal;">
+                        <input type="checkbox" id="includeMismatchesInExport">
+                        Include data mismatches
+                    </label>
                 `;
             }
             
@@ -956,6 +960,7 @@
 
         function exportToCSV() {
             const { needsChasing, noUkuId, ukuNotInSpond, dataMismatches } = reconciliationResults;
+            const includeMismatches = document.getElementById('includeMismatchesInExport')?.checked === true;
 
             let csv = 'Category,Name,Member Type,UKU ID,Email,Status,Details\n';
 
@@ -971,10 +976,12 @@
                 csv += `"UKU member not in Spond","${escapeCsvField(m.name)}","","${escapeCsvField(m.ukuId)}","${escapeCsvField(m.email)}","${escapeCsvField(m.status)}",""\n`;
             });
 
-            dataMismatches.forEach(m => {
-                const details = m.mismatches.map(mm => `${mm.field}: Spond="${mm.spond}" UKU="${mm.uku}"`).join('; ');
-                csv += `"Data mismatch","${escapeCsvField(m.spondName)}","${escapeCsvField(m.memberType)}","${escapeCsvField(m.ukuId)}","","","${escapeCsvField(details)}"\n`;
-            });
+            if (includeMismatches) {
+                dataMismatches.forEach(m => {
+                    const details = m.mismatches.map(mm => `${mm.field}: Spond="${mm.spond}" UKU="${mm.uku}"`).join('; ');
+                    csv += `"Data mismatch","${escapeCsvField(m.spondName)}","${escapeCsvField(m.memberType)}","${escapeCsvField(m.ukuId)}","","","${escapeCsvField(details)}"\n`;
+                });
+            }
 
             downloadFile(csv, 'uku-reconciliation-results.csv', 'text/csv');
         }

@@ -118,6 +118,7 @@ The tool identifies five categories of issues:
 - Columns: Category, Name, Member Type, UKU ID, Email, Status, Details
 - "Member Type" is populated for Spond-sourced rows and left blank for "UKU Not in Spond" rows (that data only lives in Spond)
 - "Details" column used for data mismatch specifics
+- Data mismatches are excluded by default; tick the "Include data mismatches" checkbox next to the export button to add them
 
 ## Dependencies
 

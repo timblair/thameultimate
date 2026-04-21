@@ -39,12 +39,29 @@ The club is affiliated with UKU and receives public liability insurance through 
 - **Format**: XLSX file
 - **How to export**: `Members` → `Active Members` → select all → click `Export`
 - **Key fields**:
+  - Member type (see below)
   - First name and surname (separate columns)
   - UKU ID (collected during club registration)
   - Member email
   - Guardian 1 email (for under-18s)
   - Payment contact email
 - **Note**: For junior members (under 18), the contact email may be a guardian's email rather than the member's own
+
+#### Member types
+
+The Spond export includes a "Member type" column used to scope the reconciliation:
+
+| Type | Treatment |
+| --- | --- |
+| Player | Reconciled against UKU |
+| Junior U12/U14 | Reconciled against UKU |
+| Junior U17 | Reconciled against UKU |
+| Parent/Guardian | Ignored (not players, no UKU membership required) |
+| Inactive | Ignored (temporarily not playing) |
+
+Ignored members are excluded from all issue categories. If an ignored member has a UKU ID recorded in Spond, that ID is still treated as "seen" so the person does not falsely surface in the "UKU Not in Spond" list.
+
+The member type column is optional — if you select "-- None --", all rows are reconciled as before.
 
 ### UKU/JustGo Export
 - **Format**: CSV file
@@ -98,7 +115,8 @@ The tool identifies five categories of issues:
 
 ### CSV Export
 - Single CSV file with all issues
-- Columns: Category, Name, UKU ID, Email, Status, Details
+- Columns: Category, Name, Member Type, UKU ID, Email, Status, Details
+- "Member Type" is populated for Spond-sourced rows and left blank for "UKU Not in Spond" rows (that data only lives in Spond)
 - "Details" column used for data mismatch specifics
 
 ## Dependencies

@@ -280,10 +280,14 @@
         <div id="spondStatus" class="file-status"></div>
         
         <div id="spondColumnSelect" style="display:none; margin-top: 1rem;">
-            <label for="spondUkuColumn">Which column contains the UKU ID?</label>
+            <label for="spondMemberTypeColumn">Which column contains the member type?</label>
+            <select id="spondMemberTypeColumn"></select>
+            <p class="field-hint">Members of type "Parent/Guardian" or "Inactive" are ignored during reconciliation. Select "-- None --" if your export has no such column.</p>
+
+            <label for="spondUkuColumn" style="margin-top: 0.75rem;">Which column contains the UKU ID?</label>
             <select id="spondUkuColumn"></select>
             <div id="spondColumnPreview" class="column-preview"></div>
-            
+
             <label for="spondFirstNameColumn" style="margin-top: 0.75rem;">Which column contains the first name?</label>
             <select id="spondFirstNameColumn"></select>
             
@@ -417,13 +421,15 @@
 
         function populateColumnDropdowns(type, columns) {
             if (type === 'spond') {
+                const memberTypeSelect = document.getElementById('spondMemberTypeColumn');
                 const ukuSelect = document.getElementById('spondUkuColumn');
                 const firstNameSelect = document.getElementById('spondFirstNameColumn');
                 const lastNameSelect = document.getElementById('spondLastNameColumn');
                 const emailSelect1 = document.getElementById('spondEmailColumn1');
                 const emailSelect2 = document.getElementById('spondEmailColumn2');
                 const emailSelect3 = document.getElementById('spondEmailColumn3');
-                
+
+                populateSelect(memberTypeSelect, columns, guessColumnStrict(columns, ['member type', 'membership type']), true);
                 populateSelect(ukuSelect, columns, guessColumn(columns, ['uku', 'member id', 'member number', 'membership', 'id number']));
                 populateSelect(firstNameSelect, columns, guessColumn(columns, ['first name', 'firstname', 'first', 'forename', 'given name']));
                 populateSelect(lastNameSelect, columns, guessColumn(columns, ['last name', 'lastname', 'last', 'surname', 'family name']));
@@ -479,12 +485,17 @@
         }
 
         function guessColumn(columns, keywords) {
+            const match = guessColumnStrict(columns, keywords);
+            return match || columns[0];
+        }
+
+        function guessColumnStrict(columns, keywords) {
             const lower = columns.map(c => c.toLowerCase());
             for (const keyword of keywords) {
                 const idx = lower.findIndex(c => c.includes(keyword));
                 if (idx !== -1) return columns[idx];
             }
-            return columns[0];
+            return null;
         }
 
         function updateColumnPreview(type) {
@@ -580,7 +591,10 @@
             return normalized;
         }
 
+        const IGNORED_MEMBER_TYPES = new Set(['parent/guardian', 'inactive']);
+
         function runReconciliation() {
+            const spondMemberTypeCol = document.getElementById('spondMemberTypeColumn').value;
             const spondUkuCol = document.getElementById('spondUkuColumn').value;
             const spondFirstNameCol = document.getElementById('spondFirstNameColumn').value;
             const spondLastNameCol = document.getElementById('spondLastNameColumn').value;
@@ -663,7 +677,8 @@
             const allGood = [];
             const noUkuId = [];
             const dataMismatches = [];
-            
+            const ignored = [];
+
             spondData.forEach(row => {
                 const rawUkuId = row[spondUkuCol];
                 const normalizedId = normalizeId(rawUkuId);
@@ -671,21 +686,31 @@
                 const lastName = (row[spondLastNameCol] || '').trim();
                 const name = `${firstName} ${lastName}`.trim() || 'Unknown';
                 const email = getEmail(row);
-                
+                const memberType = spondMemberTypeCol ? (row[spondMemberTypeCol] || '').trim() : '';
+
                 const member = {
                     name,
                     firstName,
                     lastName,
                     email,
                     ukuId: rawUkuId || '',
+                    memberType,
                     raw: row
                 };
-                
+
+                // Skip parents/guardians and inactive members, but still claim their UKU ID
+                // so they don't surface as "UKU not in Spond".
+                if (IGNORED_MEMBER_TYPES.has(memberType.toLowerCase())) {
+                    ignored.push(member);
+                    if (normalizedId) seenUkuIds.add(normalizedId);
+                    return;
+                }
+
                 if (!normalizedId) {
                     noUkuId.push(member);
                 } else if (ukuMembers.has(normalizedId)) {
                     const ukuMember = ukuMembers.get(normalizedId);
-                    
+
                     // Check for data mismatches
                     const mismatches = [];
                     if (normalizeForComparison(firstName) !== normalizeForComparison(ukuMember.firstName)) {
@@ -697,16 +722,17 @@
                     if (ukuMember.email && email && normalizeForComparison(email) !== normalizeForComparison(ukuMember.email)) {
                         mismatches.push({ field: 'Email', spond: email, uku: ukuMember.email });
                     }
-                    
+
                     if (mismatches.length > 0) {
                         dataMismatches.push({
                             ukuId: rawUkuId,
                             spondName: name,
                             ukuName: ukuMember.name,
+                            memberType,
                             mismatches
                         });
                     }
-                    
+
                     allGood.push(member);
                     seenUkuIds.add(normalizedId);
                 } else {
@@ -723,12 +749,12 @@
                 }
             });
             
-            reconciliationResults = { needsChasing, allGood, noUkuId, ukuNotInSpond, dataMismatches, ukuMembers };
+            reconciliationResults = { needsChasing, allGood, noUkuId, ukuNotInSpond, dataMismatches, ignored, ukuMembers };
             displayResults();
         }
 
         function displayResults() {
-            const { needsChasing, allGood, noUkuId, ukuNotInSpond, dataMismatches, ukuMembers } = reconciliationResults;
+            const { needsChasing, allGood, noUkuId, ukuNotInSpond, dataMismatches, ignored, ukuMembers } = reconciliationResults;
             const resultsDiv = document.getElementById('results');
             const summaryDiv = document.getElementById('summary');
             const contentDiv = document.getElementById('resultsContent');
@@ -749,6 +775,10 @@
                 <div class="stat">
                     <div class="stat-value success">${allGood.length}</div>
                     <div class="stat-label">On Spond with Active UKU Membership ✓</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">${ignored.length}</div>
+                    <div class="stat-label">Ignored (Parent/Guardian or Inactive)</div>
                 </div>
                 <div class="stat">
                     <div class="stat-value ${needsChasing.length > 0 ? 'warning' : 'success'}">${needsChasing.length}</div>
@@ -794,6 +824,7 @@
                                 <thead>
                                     <tr>
                                         <th>Name</th>
+                                        <th>Member Type</th>
                                         <th>UKU ID (from Spond)</th>
                                         <th>Email</th>
                                     </tr>
@@ -802,6 +833,7 @@
                                     ${needsChasing.map(m => `
                                         <tr>
                                             <td>${escapeHtml(m.name)}</td>
+                                            <td>${escapeHtml(m.memberType)}</td>
                                             <td>${escapeHtml(m.ukuId)}</td>
                                             <td>${escapeHtml(m.email)}</td>
                                         </tr>
@@ -811,7 +843,7 @@
                         </div>
                     `;
                 }
-                
+
                 if (noUkuId.length > 0) {
                     html += `
                         <h3 style="margin-top: 1.5rem;">Spond Members With No UKU ID Recorded</h3>
@@ -821,6 +853,7 @@
                                 <thead>
                                     <tr>
                                         <th>Name</th>
+                                        <th>Member Type</th>
                                         <th>Email</th>
                                     </tr>
                                 </thead>
@@ -828,6 +861,7 @@
                                     ${noUkuId.map(m => `
                                         <tr>
                                             <td>${escapeHtml(m.name)}</td>
+                                            <td>${escapeHtml(m.memberType)}</td>
                                             <td>${escapeHtml(m.email)}</td>
                                         </tr>
                                     `).join('')}
@@ -875,16 +909,18 @@
                                 <thead>
                                     <tr>
                                         <th>UKU ID</th>
+                                        <th>Member Type</th>
                                         <th>Field</th>
                                         <th>Spond Value</th>
                                         <th>UKU Value</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${dataMismatches.flatMap(m => 
+                                    ${dataMismatches.flatMap(m =>
                                         m.mismatches.map((mm, idx) => `
                                             <tr>
                                                 <td>${idx === 0 ? escapeHtml(m.ukuId) : ''}</td>
+                                                <td>${idx === 0 ? escapeHtml(m.memberType) : ''}</td>
                                                 <td>${escapeHtml(mm.field)}</td>
                                                 <td>${escapeHtml(mm.spond)}</td>
                                                 <td>${escapeHtml(mm.uku)}</td>
@@ -920,26 +956,26 @@
 
         function exportToCSV() {
             const { needsChasing, noUkuId, ukuNotInSpond, dataMismatches } = reconciliationResults;
-            
-            let csv = 'Category,Name,UKU ID,Email,Status,Details\n';
-            
+
+            let csv = 'Category,Name,Member Type,UKU ID,Email,Status,Details\n';
+
             needsChasing.forEach(m => {
-                csv += `"No active UKU membership","${escapeCsvField(m.name)}","${escapeCsvField(m.ukuId)}","${escapeCsvField(m.email)}","",""\n`;
+                csv += `"No active UKU membership","${escapeCsvField(m.name)}","${escapeCsvField(m.memberType)}","${escapeCsvField(m.ukuId)}","${escapeCsvField(m.email)}","",""\n`;
             });
-            
+
             noUkuId.forEach(m => {
-                csv += `"No UKU ID in Spond","${escapeCsvField(m.name)}","","${escapeCsvField(m.email)}","",""\n`;
+                csv += `"No UKU ID in Spond","${escapeCsvField(m.name)}","${escapeCsvField(m.memberType)}","","${escapeCsvField(m.email)}","",""\n`;
             });
-            
+
             ukuNotInSpond.forEach(m => {
-                csv += `"UKU member not in Spond","${escapeCsvField(m.name)}","${escapeCsvField(m.ukuId)}","${escapeCsvField(m.email)}","${escapeCsvField(m.status)}",""\n`;
+                csv += `"UKU member not in Spond","${escapeCsvField(m.name)}","","${escapeCsvField(m.ukuId)}","${escapeCsvField(m.email)}","${escapeCsvField(m.status)}",""\n`;
             });
-            
+
             dataMismatches.forEach(m => {
                 const details = m.mismatches.map(mm => `${mm.field}: Spond="${mm.spond}" UKU="${mm.uku}"`).join('; ');
-                csv += `"Data mismatch","${escapeCsvField(m.spondName)}","${escapeCsvField(m.ukuId)}","","","${escapeCsvField(details)}"\n`;
+                csv += `"Data mismatch","${escapeCsvField(m.spondName)}","${escapeCsvField(m.memberType)}","${escapeCsvField(m.ukuId)}","","","${escapeCsvField(details)}"\n`;
             });
-            
+
             downloadFile(csv, 'uku-reconciliation-results.csv', 'text/csv');
         }
         
